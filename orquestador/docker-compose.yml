@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # 1. Base de Datos MySQL
+  db-mysql:
+    image: mysql:8.0
+    container_name: db_innovatech
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_despacho # Ajusta el nombre según tu BD real
+    ports:
+      - "3306:3306"
+    volumes:
+      # PERSISTENCIA: Named volume para que los datos no se borren
+      - mysql_data:/var/lib/mysql
+    networks:
+      - red-innovatech
+
+  # 2. Backend Ventas (Puerto 8080)
+  api-ventas:
+    # IMPORTANTE: Reemplaza "tu_usuario" con tu usuario de Docker Hub
+    image: tu_usuario/backend-ventas:latest 
+    container_name: backend_ventas
+    environment:
+      # Variables de entorno para conectar a la BD
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db-mysql:3306/db_despacho?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-mysql
+    networks:
+      - red-innovatech
+
+  # 3. Backend Despachos (Puerto 8081)
+  api-despachos:
+    # IMPORTANTE: Reemplaza "tu_usuario" con tu usuario de Docker Hub
+    image: tu_usuario/backend-despachos:latest
+    container_name: backend_despachos
+    environment:
+      # Variables de entorno para conectar a la BD
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db-mysql:3306/db_despacho?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db-mysql
+    networks:
+      - red-innovatech
+
+  # 4. Frontend React/Vite (Puerto 80)
+  frontend-app:
+    # IMPORTANTE: Reemplaza "tu_usuario" con tu usuario de Docker Hub
+    image: tu_usuario/frontend-despacho:latest
+    container_name: frontend_react
+    ports:
+      - "80:80"
+    networks:
+      - red-innovatech
+
+# Definición del Named Volume
+volumes:
+  mysql_data:
+
+# Definición de la red interna
+networks:
+  red-innovatech:
+    driver: bridge
