@@ -21,6 +21,7 @@ jobs:
 
     - name: Build y Push de la imagen Docker
       run: |
+        cd front_despacho
         docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest .
         docker push ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest
 
