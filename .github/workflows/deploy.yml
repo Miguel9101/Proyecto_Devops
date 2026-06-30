@@ -8,10 +8,10 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_FRONT_REPO: front-despacho
-  ECR_BACK_REPO: springboot-api-rest
+  ECR_BACK_REPO: api-despacho
   ECS_CLUSTER: cluster-innovatech
   ECS_SERVICE_FRONT: servicio-front
-  ECS_SERVICE_BACK: servicio-back
+  ECS_SERVICE_BACK: servicio-despacho
 
 jobs:
   deploy:
