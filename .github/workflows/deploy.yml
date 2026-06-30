@@ -48,8 +48,8 @@ jobs:
     # --- BACKEND DESPACHO ---
     - name: Build y Push Backend Despacho
       run: |
-        docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_BACK_DESPACHO }}:latest -f Springboot-API-REST-DESPACHO/Dockerfile ./Springboot-API-REST-DESPACHO
-        docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_BACK_DESPACHO }}:latest
+        docker build --build-arg REACT_APP_API_URL=http://98.80.5.102:8082 -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_FRONT }}:latest -f front_despacho/Dockerfile ./front_despacho
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_FRONT }}:latest
 
     # --- REFRESH SERVICIOS ECS ---
     - name: Forzar despliegue servicios
