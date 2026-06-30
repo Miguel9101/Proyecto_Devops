@@ -7,17 +7,21 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: front-despacho
+  ECR_FRONT_REPO: front-despacho
+  ECR_BACK_REPO: springboot-api-rest
   ECS_CLUSTER: cluster-innovatech
-  ECS_SERVICE: servicio-front
+  ECS_SERVICE_FRONT: servicio-front
+  ECS_SERVICE_BACK: servicio-back
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout del código
       uses: actions/checkout@v3
+
     - name: Configurar credenciales de AWS
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -25,15 +29,29 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: ${{ env.AWS_REGION }}
+
     - name: Login en Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
-    - name: Build, tag, and push image to Amazon ECR
+
+    # --- DESPLIEGUE FRONTEND ---
+    - name: Build y Push Frontend
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f front_despacho/Dockerfile ./front_despacho
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker build -t $ECR_REGISTRY/$ECR_FRONT_REPO:latest -f front_despacho/Dockerfile ./front_despacho
+        docker push $ECR_REGISTRY/$ECR_FRONT_REPO:latest
+
+    # --- DESPLIEGUE BACKEND ---
+    - name: Build y Push Backend
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_BACK_REPO:latest -f Springboot-API-REST/Dockerfile ./Springboot-API-REST
+        docker push $ECR_REGISTRY/$ECR_BACK_REPO:latest
+
+    # --- ACTUALIZAR SERVICIOS EN ECS ---
     - name: Forzar nuevo despliegue en ECS
       run: |
-        aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
+        aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE_FRONT }} --force-new-deployment
+        aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE_BACK }} --force-new-deployment
