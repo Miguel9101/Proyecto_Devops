@@ -16,7 +16,6 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 # Configuramos permisos para cumplir con el mínimo privilegio (no usar root)
 RUN chown -R nginx:nginx /usr/share/nginx/html
-USER nginx
 # Exponemos el puerto 80
 EXPOSE 80
 # Encendemos Nginx
